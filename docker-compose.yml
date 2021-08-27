@@ -1,0 +1,24 @@
+version: "3.3"
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/src
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - 5432
+
+volumes:
+  postgres_data:
