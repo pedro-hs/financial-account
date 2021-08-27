@@ -44,6 +44,7 @@ class User(AbstractBaseUser):
     cpf = models.CharField('CPF', max_length=11, primary_key=True, unique=True)
     email = models.EmailField('email address', unique=True)
     full_name = models.CharField('full name', max_length=255)
+    birth_date = models.DateField('birth date', blank=True, null=True)
     is_active = models.BooleanField('is active', default=True)
     is_staff = models.BooleanField('is staff', default=False)
     is_superuser = models.BooleanField('is superuser', default=False)

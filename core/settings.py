@@ -2,7 +2,12 @@ import datetime
 import os
 from pathlib import Path
 
+from dotenv import find_dotenv, load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+if not os.environ.get('SECRET_KEY'):
+    load_dotenv(find_dotenv())
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
