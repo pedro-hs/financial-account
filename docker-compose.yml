@@ -10,6 +10,14 @@ services:
       - 8000:8000
     depends_on:
       - postgres
+    environment:
+      - SECRET_KEY=m_9#b^-1tsd%vwhepfgbbaq98y0=282=u1ui99cthrox239bd&
+      - DEBUG=True
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DATABASE=postgres
+      - POSTGRES_PORT=5432
   postgres:
     image: postgres:latest
     environment:
@@ -17,8 +25,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    expose:
-      - 5432
+    # network_mode: host
 
 volumes:
   postgres_data:
