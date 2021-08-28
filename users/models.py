@@ -41,14 +41,14 @@ class User(AbstractBaseUser):
         ('collaborator', 'collaborator'),
     ]
 
-    cpf = models.CharField('CPF', max_length=11, primary_key=True, unique=True)
-    email = models.EmailField('email address', unique=True)
-    full_name = models.CharField('full name', max_length=255)
-    birth_date = models.DateField('birth date', blank=True, null=True)
-    is_active = models.BooleanField('is active', default=True)
-    is_staff = models.BooleanField('is staff', default=False)
-    is_superuser = models.BooleanField('is superuser', default=False)
-    role = models.CharField('user role', default='user', choices=ROLES, max_length=20)
+    cpf = models.CharField(min_length=11, max_length=11, primary_key=True, unique=True)
+    email = models.EmailField(unique=True)
+    full_name = models.CharField(max_length=255)
+    birth_date = models.DateField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    role = models.CharField(default='customer', choices=ROLES, max_length=20)
 
     objects = UserManager()
 
