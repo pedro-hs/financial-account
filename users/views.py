@@ -4,33 +4,37 @@ from django.dispatch import receiver
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from rest_framework import status, viewsets
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import User
 from .serializers import UserSerializer
 
 
-class ModelViewSet(viewsets.ModelViewSet):
-    def perform_destroy(self, instance):
-        instance.is_active = False
-        instance.save()
+class IsBackOffice(BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated and request.user.role == 'collaborator')
 
 
-class UserViewSet(ModelViewSet):
+class IsUser(IsAuthenticated):
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated
+                    and request.user.role in ('customer', 'collaborator'))
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.role == 'collaborator':
+            return True
+
+        return request.user.role == 'customer' and obj == request.user
+
+
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
+    http_method_names = ['get', 'post', 'put', 'delete', 'head']
     serializer_class = UserSerializer
 
     class Meta:
         model = User
-
-    def get_permissions(self):
-        self.permission_classes = (IsAdminUser,)
-
-        if self.request.method == 'POST':
-            self.permission_classes = (AllowAny,)
-
-        return super().get_permissions()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -45,11 +49,26 @@ class UserViewSet(ModelViewSet):
         headers = self.get_success_headers(data)
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
+
+    def get_permissions(self):
+        self.permission_classes = [IsUser]
+
+        if self.request.method in ['POST', 'DELETE']:
+            self.permission_classes = [IsBackOffice]
+
+        elif self.request.method == 'GET' and not bool(self.kwargs):
+            self.permission_classes = [IsBackOffice]
+
+        return super().get_permissions()
+
+    def perform_destroy(self, instance):
+        instance.is_active = False
+        instance.save()
+
     def perform_update(self, serializer):
-        if serializer.validated_data.get('role', 'user') == 'admin':
+        if serializer.validated_data.get('role', 'user') == 'collaborator':
             serializer.validated_data['is_staff'] = True
 
         serializer.save()
-
-    def get_queryset(self):
-        return super().get_queryset().filter(is_active=True)

@@ -1,4 +1,5 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, UserManager
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.core.validators import MinLengthValidator
 from django.db import models
 
 
@@ -36,12 +37,11 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'email'
 
     ROLES = [
-        ('admin', 'admin'),
         ('customer', 'customer'),
         ('collaborator', 'collaborator'),
     ]
 
-    cpf = models.CharField(min_length=11, max_length=11, primary_key=True, unique=True)
+    cpf = models.CharField(primary_key=True, max_length=11, unique=True, validators=[MinLengthValidator(11)])
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
     birth_date = models.DateField(blank=True, null=True)

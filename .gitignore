@@ -1,2 +1,6 @@
 env/
 __pycache__
+.vim/
+*/migrations/*
+!*/migrations/__init__.py
+.vscode/
