@@ -17,6 +17,7 @@ class IsUser(IsUserBase):
 
 class PersonAccountViewSet(generics.CreateAPIView,
                            generics.UpdateAPIView,
+                           generics.RetrieveAPIView,
                            viewsets.ViewSet):
     queryset = PersonAccount.objects.all()
     http_method_names = ['post', 'put', 'get', 'head']
@@ -58,7 +59,7 @@ class PersonAccountViewSet(generics.CreateAPIView,
 
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
-    http_method_names = ['post', 'put', 'get', 'delete', 'head']
+    http_method_names = ['post', 'get', 'delete', 'head']
     serializer_class = PersonAccountSerializer
 
     class Meta:
