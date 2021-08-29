@@ -2,6 +2,11 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.core.validators import MinLengthValidator
 from django.db import models
 
+ROLES = [
+    ('customer', 'customer'),
+    ('collaborator', 'collaborator'),
+]
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -35,11 +40,6 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     USERNAME_FIELD = 'email'
-
-    ROLES = [
-        ('customer', 'customer'),
-        ('collaborator', 'collaborator'),
-    ]
 
     cpf = models.CharField(primary_key=True, max_length=11, unique=True, validators=[MinLengthValidator(11)])
     email = models.EmailField(unique=True)

@@ -1,31 +1,22 @@
+from common.permissions import IsBackOffice, IsUserBase
 from django.conf import settings
 from django.core.mail import send_mail
 from django.dispatch import receiver
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from rest_framework import status, viewsets
-from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import User
 from .serializers import UserSerializer
 
 
-class IsBackOffice(BasePermission):
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and request.user.role == 'collaborator')
-
-
-class IsUser(IsAuthenticated):
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated
-                    and request.user.role in ('customer', 'collaborator'))
-
-    def has_object_permission(self, request, view, obj):
+class IsUser(IsUserBase):
+    def has_object_permission(self, request, view, instance):
         if request.user.role == 'collaborator':
             return True
 
-        return request.user.role == 'customer' and obj == request.user
+        return request.user.role == 'customer' and instance == request.user
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -55,10 +46,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         self.permission_classes = [IsUser]
 
-        if self.request.method in ['POST', 'DELETE']:
-            self.permission_classes = [IsBackOffice]
-
-        elif self.request.method == 'GET' and not bool(self.kwargs):
+        if (self.request.method in ['POST', 'DELETE'] or
+                (self.request.method == 'GET' and not bool(self.kwargs))):
             self.permission_classes = [IsBackOffice]
 
         return super().get_permissions()

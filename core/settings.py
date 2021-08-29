@@ -32,6 +32,7 @@ third_party_apps = [
 
 local_apps = [
     'users',
+    'accounts',
 ]
 
 INSTALLED_APPS = [*django_apps, *third_party_apps, *local_apps]
