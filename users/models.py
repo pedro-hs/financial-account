@@ -44,7 +44,7 @@ class User(AbstractBaseUser):
     cpf = models.CharField(primary_key=True, max_length=11, unique=True, validators=[MinLengthValidator(11)])
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
-    birth_date = models.DateField(blank=True, null=True)
+    birthday = models.DateField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)

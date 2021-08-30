@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 from pathlib import Path
 
@@ -131,3 +132,17 @@ JWT_AUTH = {
     'JWT_PAYLOAD_HANDLER': 'users.jwt_handler.custom_jwt',
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=1)
 }
+
+
+LOG_DICT = {
+    'version': 1,
+    'formatters': {
+        'basic': {
+            'class': 'logging.Formatter',
+            'datefmt': '%d/%m/%Y %H:%M:%S',
+            'format': '%(levelname)s - %(asctime)s - %(message)s'
+        }
+    },
+}
+
+logging.config.dictConfig(LOG_DICT)
