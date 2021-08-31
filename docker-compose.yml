@@ -56,8 +56,8 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_QUEUE=queue
-      - SYSTEM_EMAIL=pedroiftm1999@gmail.com
-      - SYSTEM_EMAIL_PASSWORD=caligula67fuga
+      - SYSTEM_EMAIL=your@gmail.com
+      - SYSTEM_EMAIL_PASSWORD=your@password
     volumes:
       - .:/src
     restart: on-failure
