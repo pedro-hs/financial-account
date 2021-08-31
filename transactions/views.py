@@ -21,10 +21,6 @@ class ListCompanyTransactionsViewSet(generics.ListAPIView, viewsets.ViewSet):
     class Meta:
         model = ListCompanyTransactionSerializer
 
-    # TODO
-    # def get_queryset(self):
-    #     pass
-
 
 class ListPersonTransactionsViewSet(generics.ListAPIView, viewsets.ViewSet):
     queryset = PersonTransaction.objects.all()
@@ -33,10 +29,6 @@ class ListPersonTransactionsViewSet(generics.ListAPIView, viewsets.ViewSet):
 
     class Meta:
         model = PersonTransaction
-
-    # TODO
-    # def get_queryset(self):
-    #     pass
 
 
 class CreateTransaction(generics.CreateAPIView, viewsets.ViewSet):

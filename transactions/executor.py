@@ -1,5 +1,5 @@
 import logging
-from datetime import timedelta
+from datetime import date, timedelta
 from uuid import uuid4
 
 from accounts.constants import ACCOUNT_TYPES
@@ -10,6 +10,19 @@ from django.forms import model_to_dict
 
 from .constants import CANCELED_REASONS, TRANSACTION_STATUS, TRANSACTION_TYPES
 from .models import CompanyTransaction, PersonTransaction
+
+
+def calculate_credit_fees(credit_expires):
+    today = date.today()
+
+    if credit_expires < today:
+        fees = 40
+        difference = credit_expires - today
+        fees = fees * (1 + 60 / 100) ** (difference.days / 365)
+
+        return fees
+
+    return 0
 
 
 class Transaction:
@@ -120,12 +133,14 @@ class WithDrawalTransaction(Transaction):
 class BuyCreditTransaction(Transaction):
     def process(self):
         credit_outlay = self.account_instance.credit_outlay
+        self.credit_expires = self.account_instance.credit_expires
+        self.credit_fees = calculate_credit_fees(self.credit_expires)
 
         transaction_canceled_data = {'status': 'canceled',
                                      'transaction_type': self.transaction_type,
                                      'amount': self.amount}
 
-        if self.account_instance.credit_fees:
+        if self.credit_fees:
             logging.info('BuyCredit transaction canceled. Is need to pay the credit outlay and fees in order to use credit again')
             return self.create({**transaction_canceled_data,
                                 'canceled_reason': 'debitor',
@@ -150,8 +165,8 @@ class PayCreditTransaction(Transaction):
         super().__init__(account, amount, transaction_type, account_type)
         self.balance = self.account_instance.balance
         self.credit_outlay = self.account_instance.credit_outlay
-        self.credit_fees = self.account_instance.credit_fees
         self.credit_expires = self.account_instance.credit_expires
+        self.credit_fees = calculate_credit_fees(self.credit_expires)
 
     def process(self):
         if not self.credit_outlay and not self.credit_fees:
@@ -163,6 +178,13 @@ class PayCreditTransaction(Transaction):
                                 'amount': self.amount})
 
         if self.credit_fees:
+            if self.amount < self.credit_fees:
+                logging.info("PayCredit transaction canceled. Fees are pending and the amount can't pay the fees")
+                return self.create({'status': 'canceled',
+                                    'canceled_reason': 'insufficient_fund',
+                                    'note': "Fees are pending and the amount can't pay the fees",
+                                    'transaction_type': self.transaction_type,
+                                    'amount': self.amount})
             self.pay_credit_fees(self.amount)
 
         else:
@@ -178,25 +200,21 @@ class PayCreditTransaction(Transaction):
 
     def pay_credit_outlay(self, amount):
         if amount >= self.credit_outlay:
-            chargeback = amount - self.credit_outlay
+            chargeback = float(amount) - float(self.credit_outlay)
             self.account_instance.credit_outlay = 0
 
             if chargeback:
-                self.account_instance.balance = self.balance + chargeback
+                self.account_instance.balance = float(self.balance) + float(chargeback)
 
         if amount < self.credit_outlay:
-            self.account_instance.credit_outlay = self.credit_outlay - amount
+            self.account_instance.credit_outlay = float(self.credit_outlay) - float(amount)
 
     def pay_credit_fees(self, amount):
         if amount >= self.credit_fees:
             remaining = amount - self.credit_fees
-            self.account_instance.credit_fees = 0
 
             if remaining:
                 self.pay_credit_outlay(remaining)
-
-        if amount < self.credit_fees:
-            self.account_instance.credit_fees = self.credit_fees - amount
 
 
 TRANSACTIONS = {'deposit': DepositTransaction,
@@ -224,7 +242,7 @@ class TransactionExecutor:
         if self.transaction_type not in TRANSACTION_TYPES:
             raise BadRequest('Invalid transaction_type')
 
-        if self.amount < 1 or not str(self.amount).isnumeric():
+        if self.amount < 1:
             raise BadRequest('Invalid amount')
 
         account_owners = self.account_type_status.count(True)

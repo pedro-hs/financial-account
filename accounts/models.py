@@ -37,19 +37,6 @@ class BaseAccount(models.Model):
     withdrawal_limit = models.DecimalField(default=0, max_digits=12, decimal_places=2)
     balance = models.DecimalField(default=0, max_digits=12, decimal_places=2)
 
-    @property
-    def credit_fees(self):
-        today = date.today()
-
-        if self.credit_expires < today:
-            fees = 40
-            difference = self.credit_expires - today
-            fees = fees * (1 + 60 / 100) ** (difference.days / 365)
-
-            return fees
-
-        return 0
-
     class Meta:
         abstract = True
 
