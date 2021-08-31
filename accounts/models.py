@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 from random import randint
 
 from django.core.validators import MinLengthValidator, RegexValidator
@@ -33,7 +33,7 @@ class BaseAccount(models.Model):
     status = models.CharField(default='open', choices=ACCOUNT_STATUS_CHOICES, max_length=20)
     credit_limit = models.DecimalField(default=0, max_digits=12, decimal_places=2)
     credit_outlay = models.DecimalField(default=0, max_digits=12, decimal_places=2)
-    credit_expires = models.DateField()
+    credit_expires = models.DateField(default=datetime.now() + timedelta(days=30))
     withdrawal_limit = models.DecimalField(default=0, max_digits=12, decimal_places=2)
     balance = models.DecimalField(default=0, max_digits=12, decimal_places=2)
 
