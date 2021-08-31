@@ -16,9 +16,6 @@
 - Criar superusuario
   `python3 manage.py createsuperuser`
 
-- Comentar no arquivo docker-compose.yml nas configurações do postgres
-  `network_mode: host`
-
 - Subir API
   `docker-compose down`
   `docker-compose up`
