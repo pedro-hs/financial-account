@@ -1,0 +1,9 @@
+FROM python:3.8
+
+RUN pip install pika python-dotenv
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /src
+COPY . .

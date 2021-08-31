@@ -5,6 +5,8 @@ from uuid import uuid4
 from accounts.constants import ACCOUNT_TYPES
 from accounts.models import CompanyAccount, PersonAccount
 from common.errors import BadRequest
+from common.rabbitmq import send_message
+from django.forms import model_to_dict
 
 from .constants import CANCELED_REASONS, TRANSACTION_STATUS, TRANSACTION_TYPES
 from .models import CompanyTransaction, PersonTransaction
@@ -17,42 +19,62 @@ class Transaction:
         self.amount = amount
         self.transaction_type = transaction_type
         self.account_type = account_type
+        self.load_data()
 
+    def load_data(self):
         get_instance = {'user': PersonAccount.objects.filter(pk=self.account.number).first(),
                         'company': CompanyAccount.objects.filter(pk=self.account.number).first()}
-        get_model = {'user': PersonTransaction,
-                     'company': CompanyTransaction}
+        self.account_instance = get_instance[self.account_type]
 
-        self.owner = getattr(self.account, self.account_type)
-        self.account_instance = get_instance[account_type]
+        get_email = {'user': (self.account_instance.user.email
+                              if hasattr(self.account_instance, 'user') else None),
+                     'company': (self.account_instance.company.user.email
+                                 if hasattr(self.account_instance, 'company') else None)}
+        self.email = get_email[self.account_type]
 
         get_owner_id = {'user': (self.account_instance.user.cpf
                                  if hasattr(self.account_instance, 'user') else None),
                         'company': (self.account_instance.company.cnpj
                                     if hasattr(self.account_instance, 'company') else None)}
+        self.owner_id = get_owner_id[self.account_type]
 
-        self.owner_id = get_owner_id[account_type]
-        self.transaction_model = get_model[account_type]
+        get_user = {'user': (self.account_instance.user
+                             if hasattr(self.account_instance, 'user') else None),
+                    'company': (self.account_instance.company
+                                if hasattr(self.account_instance, 'company') else None)}
+        self.user_data = get_user[self.account_type]
+
+        get_model = {'user': PersonTransaction,
+                     'company': CompanyTransaction}
+        self.transaction_model = get_model[self.account_type]
+
+        self.owner = getattr(self.account, self.account_type)
 
     def execute(self):
         if self.account_instance.status == 'frozen':
             logging.info("%s transaction canceled. Account is frozen and can't execute transactions", self.transaction_type)
-            self.create({'status': 'canceled',
-                         'transaction_type': self.transaction_type,
-                         'canceled_reason': 'frozen',
-                         'note': "Account is frozen and can't execute transactions",
-                         'amount': self.amount})
+            return self.create({'status': 'canceled',
+                                'transaction_type': self.transaction_type,
+                                'canceled_reason': 'frozen',
+                                'note': "Account is frozen and can't execute transactions",
+                                'amount': self.amount})
 
         return self.process()
 
     def create(self, transaction_data):
         transaction_data = {**transaction_data,
-                            'id': uuid4(),
+                            'id': str(uuid4()),
                             'account': self.account}
         new_transaction = self.transaction_model.objects.create(**transaction_data)
 
         if transaction_data['status'] != 'canceled':
             self.account_instance.save()
+
+        message = {'transaction': model_to_dict(new_transaction),
+                   'account': {**model_to_dict(self.account),
+                               'owner_id': self.owner_id},
+                   'email_type': 'transaction'}
+        send_message(message_type='send_email', to=self.email, message=message)
 
         return new_transaction
 

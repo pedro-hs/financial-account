@@ -4,12 +4,6 @@ services:
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/src
-    ports:
-      - 8000:8000
-    depends_on:
-      - postgres
     environment:
       - SECRET_KEY=m_9#b^-1tsd%vwhepfgbbaq98y0=282=u1ui99cthrox239bd&
       - DEBUG=True
@@ -18,6 +12,20 @@ services:
       - POSTGRES_HOST=postgres
       - POSTGRES_DATABASE=postgres
       - POSTGRES_PORT=5432
+      - RABBITMQ_USER=rabbitmq
+      - RABBITMQ_PASSWORD=rabbitmq
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_QUEUE=queue
+    volumes:
+      - .:/src
+    restart: on-failure
+    ports:
+      - 8000:8000
+    depends_on:
+      - rabbitmq
+      - postgres
+
   postgres:
     image: postgres:latest
     environment:
@@ -25,7 +33,37 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    network_mode: host
+    # network_mode: host
+
+  rabbitmq:
+    image: rabbitmq:latest
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbitmq
+      - RABBITMQ_DEFAULT_PASS=rabbitmq
+    volumes:
+      - rabbitmq_data:/data
+    restart: on-failure
+    ports:
+      - 5672:5672
+      - 8080:15672
+
+  notification:
+    build: notification
+    command: python notification/consumer.py
+    environment:
+      - RABBITMQ_USER=rabbitmq
+      - RABBITMQ_PASSWORD=rabbitmq
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_QUEUE=queue
+      - SYSTEM_EMAIL=pedroiftm1999@gmail.com
+      - SYSTEM_EMAIL_PASSWORD=caligula67fuga
+    volumes:
+      - .:/src
+    restart: on-failure
+    depends_on:
+      - rabbitmq
 
 volumes:
   postgres_data:
+  rabbitmq_data:

@@ -3,18 +3,19 @@ import logging
 import os
 from pathlib import Path
 
+from common.utils import use_local_env
 from dotenv import find_dotenv, load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-if not os.environ.get('SECRET_KEY'):
+if use_local_env():
     load_dotenv(find_dotenv())
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = os.environ['DEBUG']
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost']
 
 django_apps = [
     'django.contrib.admin',
