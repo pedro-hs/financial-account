@@ -35,34 +35,44 @@ class Transaction:
         self.transaction_model = get_model[account_type]
 
     def execute(self):
+        transaction_data = self.pre_validate()
+
+        if transaction_data['status'] != 'canceled':
+            transaction_data = self.process()
+            transaction_data = self.pos_validate(transaction_data)
+
+        return self.create(transaction_data)
+
+    def pre_validate(self):
         if self.account_instance.status == 'frozen':
-            transaction_data = {'status': 'canceled',
-                                'transaction_type': self.transaction_type,
-                                'canceled_reason': 'frozen',
-                                'note': "Account is frozen and can't execute transactions",
-                                'amount': self.amount}
+            return {'status': 'canceled',
+                    'transaction_type': self.transaction_type,
+                    'canceled_reason': 'frozen',
+                    'note': "Account is frozen and can't execute transactions",
+                    'amount': self.amount}
 
-            return self.create(transaction_data)
-
-        self.process()
-
-    def create(self, transaction_data):
+    def pos_validate(self, transaction_data):
         if transaction_data.get('status') not in TRANSACTION_STATUS:
-            transaction_data = {**transaction_data,
-                                'status': 'canceled',
-                                'canceled_reason': 'invalid_enum',
-                                'note': 'Provided status is invalid'}
+            return {**transaction_data,
+                    'status': 'canceled',
+                    'canceled_reason': 'invalid_enum',
+                    'note': 'Provided status is invalid'}
 
         if transaction_data.get('canceled_reason') and transaction_data.get('canceled_reason') not in CANCELED_REASONS:
-            transaction_data = {**transaction_data,
-                                'status': 'canceled',
-                                'canceled_reason': 'invalid_enum',
-                                'note': 'Provided canceled reason is invalid'}
+            return {**transaction_data,
+                    'status': 'canceled',
+                    'canceled_reason': 'invalid_enum',
+                    'note': 'Provided canceled reason is invalid'}
 
+        return transaction_data
+
+    def create(self, transaction_data):
         transaction_data = {**transaction_data,
                             'account': self.account}
         new_transaction = self.transaction_model.objects.create(**transaction_data)
-        self.account_instance.save()
+
+        if transaction_data['status'] != 'canceled':
+            self.account_instance.save()
 
         return new_transaction
 
