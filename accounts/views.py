@@ -4,8 +4,11 @@ from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
-from .models import STATUS, Company, CompanyAccount, PersonAccount
-from .serializers import CompanyAccountSerializer, CompanySerializer, PersonAccountSerializer
+from .constants import ACCOUNT_STATUS
+from .models import Company, CompanyAccount, PersonAccount
+from .serializers import (CompanySerializer, DefaultCompanyAccountSerializer,
+                          DefaultPersonAccountSerializer, PostCompanyAccountSerializer,
+                          PostPersonAccountSerializer)
 
 
 class IsUser(IsUserBase):
@@ -33,13 +36,37 @@ class IsUserCompany(IsAuthenticated):
         return request.user.role == 'customer' and instance.company.user == request.user
 
 
-class PersonAccountViewSet(generics.CreateAPIView,
-                           generics.UpdateAPIView,
-                           generics.RetrieveAPIView,
-                           viewsets.ViewSet):
+class BaseAccountViewSet(generics.CreateAPIView,
+                         generics.UpdateAPIView,
+                         generics.RetrieveAPIView,
+                         viewsets.ViewSet):
+    class Meta:
+        abstract = True
+
+    def update(self, request, *args, **kwargs):
+        instance = self.Meta.model.objects.get(pk=kwargs['pk'])
+        data = request.data
+
+        if data.get('status'):
+            if data['status'] not in ACCOUNT_STATUS:
+                return Response(status=400, data={'message': 'Invalid status'})
+
+            instance.status = data['status']
+
+        if data.get('credit_limit'):
+            instance.credit_limit = data['credit_limit']
+
+        if data.get('withdrawal_limit'):
+            instance.withdrawal_limit = data['withdrawal_limit']
+
+        instance.save()
+        return Response(status=204)
+
+
+class PersonAccountViewSet(BaseAccountViewSet):
     queryset = PersonAccount.objects.all()
     http_method_names = ['post', 'put', 'get', 'head']
-    serializer_class = PersonAccountSerializer
+    serializer_class = DefaultPersonAccountSerializer
 
     class Meta:
         model = PersonAccount
@@ -52,36 +79,17 @@ class PersonAccountViewSet(generics.CreateAPIView,
 
         return super().get_permissions()
 
-    def update(self, request, *args, **kwargs):
-        instance = PersonAccount.objects.get(pk=kwargs['pk'])
-        data = request.data
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return PostPersonAccountSerializer
 
-        if instance.user.cpf != data['user'] or instance.digit != data['digit'] or instance.agency != data['agency']:
-            return Response(status=400, data={'message': 'Invalid account data'})
-
-        if data['status']:
-            if data['status'] not in dict(STATUS).keys():
-                return Response(status=400, data={'message': 'Invalid status'})
-
-            instance.status = data['status']
-
-        if data['credit_limit'] and data['credit_limit'] > instance.credit_limit:
-            instance.credit_limit = data['credit_limit']
-
-        if data['withdrawal_limit'] and data['withdraw_limit'] > instance.withdraw_limit:
-            instance.withdrawal_limit = data['withdraw_limit']
-
-        instance.save()
-        return Response(status=204)
+        return DefaultPersonAccountSerializer
 
 
-class CompanyAccountViewSet(generics.CreateAPIView,
-                            generics.UpdateAPIView,
-                            generics.RetrieveAPIView,
-                            viewsets.ViewSet):
+class CompanyAccountViewSet(BaseAccountViewSet):
     queryset = CompanyAccount.objects.all()
     http_method_names = ['post', 'put', 'get', 'head']
-    serializer_class = CompanyAccountSerializer
+    serializer_class = DefaultCompanyAccountSerializer
 
     class Meta:
         model = CompanyAccount
@@ -94,39 +102,23 @@ class CompanyAccountViewSet(generics.CreateAPIView,
 
         return super().get_permissions()
 
-    def update(self, request, *args, **kwargs):
-        instance = CompanyAccount.objects.get(pk=kwargs['pk'])
-        data = request.data
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return PostCompanyAccountSerializer
 
-        if instance.company != data['company'] or instance.digit != data['digit'] or instance.agency != data['agency']:
-            return Response(status=400, data={'message': 'Invalid account data'})
-
-        if data['status']:
-            if data['status'] not in dict(STATUS).keys():
-                return Response(status=400, data={'message': 'Invalid status'})
-
-            instance.status = data['status']
-
-        if data['credit_limit'] and data['credit_limit'] > instance.credit_limit:
-            instance.credit_limit = data['credit_limit']
-
-        if data['withdrawal_limit'] and data['withdraw_limit'] > instance.withdraw_limit:
-            instance.withdrawal_limit = data['withdraw_limit']
-
-        instance.save()
-        return Response(status=204)
+        return DefaultCompanyAccountSerializer
 
 
-class CompanyViewSet(viewsets.ModelViewSet):
+class CompanyViewSet(generics.CreateAPIView,
+                     generics.RetrieveAPIView,
+                     generics.DestroyAPIView,
+                     viewsets.ViewSet):
     queryset = Company.objects.all()
     http_method_names = ['post', 'get', 'delete', 'head']
-    serializer_class = PersonAccountSerializer
+    serializer_class = CompanySerializer
 
     class Meta:
         model = PersonAccount
-
-    def get_queryset(self):
-        return super().get_queryset().filter(is_active=True)
 
     def get_permissions(self):
         self.permission_classes = [IsUser]
@@ -136,7 +128,3 @@ class CompanyViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsBackOffice]
 
         return super().get_permissions()
-
-    def perform_destroy(self, instance):
-        instance.is_active = False
-        instance.save()

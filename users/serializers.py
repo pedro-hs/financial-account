@@ -4,11 +4,9 @@ from rest_framework import serializers
 from .models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
+class BaseUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ('cpf', 'email', 'full_name', 'password', 'is_active', 'is_staff', 'role')
-        extra_kwargs = {'password': {'write_only': True}}
+        abstract = True
 
     def get_fields(self, *args, **kwargs):
         fields = super().get_fields(*args, **kwargs)
@@ -56,3 +54,25 @@ class UserSerializer(serializers.ModelSerializer):
 
         if unknown:
             raise serializers.ValidationError("Unknown field(s): {}".format(", ".join(unknown)))
+
+
+class DefaultUserSerializer(BaseUserSerializer):
+    class Meta:
+        model = User
+        fields = ('cpf', 'email', 'full_name', 'is_active', 'role')
+        read_only_fields = ('cpf', 'email')
+
+
+class PostUserSerializer(BaseUserSerializer):
+    class Meta:
+        model = User
+        fields = ('cpf', 'email', 'full_name', 'password', 'is_active', 'role')
+        extra_kwargs = {'password': {'write_only': True}}
+
+
+class PutUserSerializer(BaseUserSerializer):
+    class Meta:
+        model = User
+        fields = ('cpf', 'email', 'full_name', 'password', 'is_active', 'role')
+        read_only_fields = ('cpf', 'email')
+        extra_kwargs = {'password': {'write_only': True}}

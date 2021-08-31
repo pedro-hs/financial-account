@@ -1,16 +1,13 @@
 from datetime import date
+from random import randint
 
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 from users.models import User
 
-IS_NUMERIC = RegexValidator(r'^[0-9+]', 'Only numeric characters.')
+from .constants import ACCOUNT_STATUS_CHOICES
 
-STATUS = [
-    ('open', 'open'),
-    ('closed', 'closed'),
-    ('frozen', 'frozen'),
-]
+IS_NUMERIC = RegexValidator(r'^[0-9+]', 'Only numeric characters.')
 
 
 class Company(models.Model):
@@ -29,11 +26,11 @@ class Company(models.Model):
 
 
 class BaseAccount(models.Model):
-    number = models.CharField(primary_key=True, unique=True, max_length=11,
+    number = models.CharField(primary_key=True, unique=True, max_length=11, default=str(randint(1111, 99999999999)),
                               validators=[MinLengthValidator(4)])
     digit = models.CharField(max_length=1, validators=[MinLengthValidator(1)])
     agency = models.CharField(max_length=4, validators=[MinLengthValidator(2)])
-    status = models.CharField(default='open', choices=STATUS, max_length=20)
+    status = models.CharField(default='open', choices=ACCOUNT_STATUS_CHOICES, max_length=20)
     credit_limit = models.DecimalField(default=0, max_digits=12, decimal_places=2)
     credit_outlay = models.DecimalField(default=0, max_digits=12, decimal_places=2)
     credit_expires = models.DateField()

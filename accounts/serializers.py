@@ -1,24 +1,40 @@
 
 from rest_framework import serializers
 
-from .models import Company, PersonAccount
+from .models import Company, CompanyAccount, PersonAccount
+
+ACCOUNT_FIELDS = ('number', 'digit', 'agency', 'status', 'credit_limit',
+                  'credit_outlay', 'credit_expires', 'withdrawal_limit', 'balance')
+ACCOUNT_READONLY_FIELDS = ('number', 'digit', 'agency', 'balance', 'credit_expires', 'credit_outlay')
 
 
-class PersonAccountSerializer(serializers.ModelSerializer):
+class DefaultPersonAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonAccount
-        fields = ('user', 'number', 'digit', 'agency', 'status', 'credit_limit',
-                  'credit_outlay', 'credit_expires', 'withdrawal_limit', 'balance', 'credit_fees')
+        fields = ('user', *ACCOUNT_FIELDS)
+        read_only_fields = ('user', *ACCOUNT_READONLY_FIELDS)
 
 
-class CompanyAccountSerializer(serializers.ModelSerializer):
+class PostPersonAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonAccount
-        fields = ('company', 'number', 'digit', 'agency', 'status', 'credit_limit',
-                  'credit_outlay', 'credit_expires', 'withdrawal_limit', 'balance', 'credit_fees')
+        fields = '__all__'
+
+
+class DefaultCompanyAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyAccount
+        fields = ('company', *ACCOUNT_FIELDS)
+        read_only_fields = ('company', *ACCOUNT_READONLY_FIELDS)
+
+
+class PostCompanyAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyAccount
+        fields = '__all__'
 
 
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ('user', 'cnpj', 'trademark')
+        fields = '__all__'

@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from account.models import CompanyAccount, PersonAccount
+from accounts.models import CompanyAccount, PersonAccount
 from django.db import models
 
 from .constants import (CANCELED_REASONS_CHOICES, TRANSACTION_STATUS_CHOICES,

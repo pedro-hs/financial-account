@@ -34,6 +34,7 @@ third_party_apps = [
 local_apps = [
     'users',
     'accounts',
+    'transactions',
 ]
 
 INSTALLED_APPS = [*django_apps, *third_party_apps, *local_apps]
@@ -133,16 +134,5 @@ JWT_AUTH = {
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=1)
 }
 
-
-LOG_DICT = {
-    'version': 1,
-    'formatters': {
-        'basic': {
-            'class': 'logging.Formatter',
-            'datefmt': '%d/%m/%Y %H:%M:%S',
-            'format': '%(levelname)s - %(asctime)s - %(message)s'
-        }
-    },
-}
-
-logging.config.dictConfig(LOG_DICT)
+logging.basicConfig(datefmt='%d/%m/%Y %H:%M:%S',
+                    format='%(levelname)s - %(asctime)s - [%(filename)s:%(lineno)d] - %(message)s')

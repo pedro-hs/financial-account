@@ -1,10 +1,12 @@
-from accounts.views import CompanyViewSet, PersonAccountViewSet
+from accounts.views import CompanyAccountViewSet, CompanyViewSet, PersonAccountViewSet
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 from rest_framework.schemas import get_schema_view
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
+from transactions.views import (CreateCompanyTransactionViewSet, CreatePersonTransactionViewSet,
+                                ListCompanyTransactionsViewSet, ListPersonTransactionsViewSet)
 from users.views import UserViewSet
 
 doc_schema = get_schema_view(
@@ -14,8 +16,13 @@ doc_schema = get_schema_view(
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
-router.register(r'person/accounts', PersonAccountViewSet)
+router.register(r'accounts/person', PersonAccountViewSet)
+router.register(r'accounts/company', CompanyAccountViewSet)
 router.register(r'company', CompanyViewSet)
+router.register(r'transactions/accounts/company', CreateCompanyTransactionViewSet)
+router.register(r'transactions/accounts/person', CreatePersonTransactionViewSet)
+router.register(r'transactions/accounts/company/list', ListCompanyTransactionsViewSet)
+router.register(r'transactions/accounts/person/list', ListPersonTransactionsViewSet)
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

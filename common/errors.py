@@ -2,7 +2,10 @@ from rest_framework.exceptions import APIException
 
 
 class BadRequest(APIException):
-    def __init__(self, message=''):
-        setattr('status_code', 400)
-        setattr('default_detail', message)
-        setattr('default_code', 'bad_request')
+    status_code = 400
+    default_detail = ''
+    default_code = 'bad_requestl'
+
+    def __init__(self, detail, message=''):
+        self.detail = detail
+        self.default_detail = message

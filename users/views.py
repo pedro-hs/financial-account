@@ -4,11 +4,11 @@ from django.core.mail import send_mail
 from django.dispatch import receiver
 from django.forms.models import model_to_dict
 from django.urls import reverse
-from rest_framework import status, viewsets
+from rest_framework import viewsets
 from rest_framework.response import Response
 
 from .models import User
-from .serializers import UserSerializer
+from .serializers import DefaultUserSerializer, PostUserSerializer, PutUserSerializer
 
 
 class IsUser(IsUserBase):
@@ -22,7 +22,7 @@ class IsUser(IsUserBase):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     http_method_names = ['get', 'post', 'put', 'delete', 'head']
-    serializer_class = UserSerializer
+    serializer_class = DefaultUserSerializer
 
     class Meta:
         model = User
@@ -36,9 +36,9 @@ class UserViewSet(viewsets.ModelViewSet):
         instance.set_password(password)
         instance.save()
 
-        data = UserSerializer(instance).data
+        data = DefaultUserSerializer(instance).data
         headers = self.get_success_headers(data)
-        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(data, status=201, headers=headers)
 
     def get_queryset(self):
         return super().get_queryset().filter(is_active=True)
@@ -51,6 +51,11 @@ class UserViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsBackOffice]
 
         return super().get_permissions()
+
+    def get_serializer_class(self):
+        get_serializer = {'update': PutUserSerializer,
+                          'create': PostUserSerializer}
+        return get_serializer.get(self.action, DefaultUserSerializer)
 
     def perform_destroy(self, instance):
         instance.is_active = False
