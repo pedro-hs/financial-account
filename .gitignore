@@ -6,3 +6,5 @@ __pycache__
 .vscode/
 htmlcov/
 .coverage
+core/static/*
+clean.sh
