@@ -1,7 +1,5 @@
 - Permitir acesso a app menos seguro no gmail
 
-- Colocar valores validos para email e senha nos arquivos .env e docker-compose.yml
-
 - `(Em um ambiente debian like)`
 
 - Clonar o projeto
@@ -9,6 +7,8 @@
 
 - Entrar na pasta do projeto
   `cd financial-account`
+
+- Colocar valores validos para email e senha nos arquivos .env e docker-compose.yml
 
 - Executar o arquivo start.sh
   `source start.sh`
@@ -20,6 +20,7 @@
   `network_mode: host`
 
 - Subir API
-  `docker-compose up -d web`
+  `docker-compose down`
+  `docker-compose up`
 
 - A partir daqui as requisições podem sem feitas pelas collections do postman, ou pelo swagger da url `/docs`
