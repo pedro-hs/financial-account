@@ -41,7 +41,7 @@ class BaseAccount(models.Model):
     def credit_fees(self):
         today = date.today()
 
-        if self.credit_expires > today:
+        if self.credit_expires < today:
             fees = 40
             difference = self.credit_expires - today
             fees = fees * (1 + 60 / 100) ** (difference.days / 365)

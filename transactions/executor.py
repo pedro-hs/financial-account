@@ -35,39 +35,19 @@ class Transaction:
         self.transaction_model = get_model[account_type]
 
     def execute(self):
-        transaction_data = self.pre_validate()
-
-        if transaction_data['status'] != 'canceled':
-            transaction_data = self.process()
-            transaction_data = self.pos_validate(transaction_data)
-
-        return self.create(transaction_data)
-
-    def pre_validate(self):
         if self.account_instance.status == 'frozen':
-            return {'status': 'canceled',
-                    'transaction_type': self.transaction_type,
-                    'canceled_reason': 'frozen',
-                    'note': "Account is frozen and can't execute transactions",
-                    'amount': self.amount}
+            logging.info("%s transaction canceled. Account is frozen and can't execute transactions", self.transaction_type)
+            self.create({'status': 'canceled',
+                         'transaction_type': self.transaction_type,
+                         'canceled_reason': 'frozen',
+                         'note': "Account is frozen and can't execute transactions",
+                         'amount': self.amount})
 
-    def pos_validate(self, transaction_data):
-        if transaction_data.get('status') not in TRANSACTION_STATUS:
-            return {**transaction_data,
-                    'status': 'canceled',
-                    'canceled_reason': 'invalid_enum',
-                    'note': 'Provided status is invalid'}
-
-        if transaction_data.get('canceled_reason') and transaction_data.get('canceled_reason') not in CANCELED_REASONS:
-            return {**transaction_data,
-                    'status': 'canceled',
-                    'canceled_reason': 'invalid_enum',
-                    'note': 'Provided canceled reason is invalid'}
-
-        return transaction_data
+        return self.process()
 
     def create(self, transaction_data):
         transaction_data = {**transaction_data,
+                            'id': uuid4(),
                             'account': self.account}
         new_transaction = self.transaction_model.objects.create(**transaction_data)
 
@@ -81,6 +61,7 @@ class DepositTransaction(Transaction):
     def process(self):
         self.account_instance.balance = self.account_instance.balance + self.amount
 
+        logging.info('Deposit transaction done')
         return self.create({'status': 'done',
                             'transaction_type': self.transaction_type,
                             'amount': self.amount})
@@ -95,17 +76,20 @@ class WithDrawalTransaction(Transaction):
                                      'amount': self.amount}
 
         if self.amount > balance:
+            logging.info('WithDrawal transaction canceled. Fund is lower than balance')
             return self.create({**transaction_canceled_data,
                                 'canceled_reason': 'insufficient_fund',
                                 'note': 'Fund is lower than balance'})
 
         if self.amount > self.account_instance.withdrawal_limit:
+            logging.info('WithDrawal transaction canceled. Limit of withdrawal achieved')
             return self.create({**transaction_canceled_data,
                                 'canceled_reason': 'limit',
                                 'note': 'Limit of withdrawal achieved'})
 
         self.account_instance.balance = balance - self.amount
 
+        logging.info('WithDrawal transaction done')
         return self.create({'status': 'done',
                             'transaction_type': self.transaction_type,
                             'amount': self.amount})
@@ -120,25 +104,28 @@ class BuyCreditTransaction(Transaction):
                                      'amount': self.amount}
 
         if self.account_instance.credit_fees:
+            logging.info('BuyCredit transaction canceled. Is need to pay the credit outlay and fees in order to use credit again')
             return self.create({**transaction_canceled_data,
                                 'canceled_reason': 'debitor',
                                 'note': 'Is need to pay the credit outlay and fees in order to use credit again'})
 
         if (credit_outlay + self.amount) > self.account_instance.credit_limit:
+            logging.info('BuyCredit transaction canceled. Limit of credit achieved')
             return self.create({**transaction_canceled_data,
                                 'canceled_reason': 'limit',
                                 'note': 'Limit of credit achieved'})
 
         self.account_instance.credit_outlay = + self.amount
 
+        logging.info('BuyCredit transaction done')
         return self.create({'status': 'done',
                             'transaction_type': self.transaction_type,
                             'amount': self.amount})
 
 
 class PayCreditTransaction(Transaction):
-    def __init__(self, account, amount, transaction_type):
-        super().__init__(account, amount, transaction_type)
+    def __init__(self, account, amount, transaction_type, account_type):
+        super().__init__(account, amount, transaction_type, account_type)
         self.balance = self.account_instance.balance
         self.credit_outlay = self.account_instance.credit_outlay
         self.credit_fees = self.account_instance.credit_fees
@@ -146,6 +133,7 @@ class PayCreditTransaction(Transaction):
 
     def process(self):
         if not self.credit_outlay and not self.credit_fees:
+            logging.info('PayCredit transaction canceled. Nothing to pay')
             return self.create({'status': 'canceled',
                                 'canceled_reason': 'no_pay',
                                 'note': 'Nothing to pay',
@@ -158,9 +146,10 @@ class PayCreditTransaction(Transaction):
         else:
             self.pay_credit_outlay(self.amount)
 
-        if not self.credit_outlay:
+        if not self.account_instance.credit_outlay:
             self.account_instance.credit_expires = self.credit_expires + timedelta(days=30)
 
+        logging.info('PayCredit transaction done')
         return self.create({'status': 'done',
                             'transaction_type': self.transaction_type,
                             'amount': self.amount})
@@ -200,11 +189,13 @@ class TransactionExecutor:
         self.account = account
         self.account_type_status = [hasattr(self.account, account_type)
                                     for account_type in ACCOUNT_TYPES]
+        self.account_type = self.get_account_type()
         self.amount = amount
+
+        logging.info('Processing %s transaction for %s', transaction_type, self.account_type)
 
     def process(self):
         self.validate_data()
-        self.set_account_type()
         return self.execute_transaction()
 
     def validate_data(self):
@@ -222,10 +213,9 @@ class TransactionExecutor:
         elif account_owners < 1:
             raise BadRequest('Invalid account. Account need to have an owner')
 
-    def set_account_type(self):
+    def get_account_type(self):
         transaction_type_index = self.account_type_status.index(True)
-        account_type = ACCOUNT_TYPES[transaction_type_index]
-        self.account_type = account_type
+        return ACCOUNT_TYPES[transaction_type_index]
 
     def execute_transaction(self):
         return TRANSACTIONS[self.transaction_type](self.account, self.amount, self.transaction_type, self.account_type).execute()

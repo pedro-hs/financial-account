@@ -8,7 +8,7 @@ from .constants import (CANCELED_REASONS_CHOICES, TRANSACTION_STATUS_CHOICES,
 
 
 class BaseTransaction(models.Model):
-    id = models.CharField(primary_key=True, unique=True, default=uuid4(), max_length=36)
+    id = models.CharField(primary_key=True, unique=True, max_length=36)
     transaction_type = models.CharField(choices=TRANSACTION_TYPES_CHOICES, max_length=20)
     status = models.CharField(choices=TRANSACTION_STATUS_CHOICES, max_length=20)
     amount = models.DecimalField(default=0, max_digits=12, decimal_places=2)

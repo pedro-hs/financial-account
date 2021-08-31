@@ -1,5 +1,9 @@
+import json
+
 from accounts.models import CompanyAccount, PersonAccount
 from common.errors import BadRequest
+from django.forms import model_to_dict
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, viewsets
 from rest_framework.response import Response
 
@@ -46,7 +50,7 @@ class CreateTransaction(generics.CreateAPIView, viewsets.ViewSet):
         account = self.get_acount(request.data)
 
         transaction_data = TransactionExecutor(account, amount, transaction_type).process()
-        transaction_data = self.serializer(transaction_data)
+        transaction_data = model_to_dict(transaction_data)
 
         return Response(transaction_data, status=201)
 
@@ -79,7 +83,7 @@ class CreateCompanyTransactionViewSet(CreateTransaction):
         return account.company.cnpj == owner_id
 
     def query_account(self, number):
-        return CompanyAccount.objects.get(pk=number)
+        return get_object_or_404(CompanyAccount, pk=number)
 
 
 class CreatePersonTransactionViewSet(CreateTransaction):
@@ -94,4 +98,4 @@ class CreatePersonTransactionViewSet(CreateTransaction):
         return account.user.cpf == owner_id
 
     def query_account(self, number):
-        return PersonAccount.objects.get(pk=number)
+        return get_object_or_404(PersonAccount, pk=number)

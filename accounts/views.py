@@ -1,4 +1,6 @@
+from common.errors import BadRequest
 from common.permissions import IsBackOffice, IsUserBase
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission, IsAuthenticated
@@ -44,12 +46,12 @@ class BaseAccountViewSet(generics.CreateAPIView,
         abstract = True
 
     def update(self, request, *args, **kwargs):
-        instance = self.Meta.model.objects.get(pk=kwargs['pk'])
+        instance = get_object_or_404(self.Meta.model, pk=kwargs['pk'])
         data = request.data
 
         if data.get('status'):
             if data['status'] not in ACCOUNT_STATUS:
-                return Response(status=400, data={'message': 'Invalid status'})
+                raise BadRequest('Invalid status')
 
             instance.status = data['status']
 
