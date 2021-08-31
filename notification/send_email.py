@@ -5,6 +5,11 @@ from dotenv import find_dotenv, load_dotenv
 
 from utils import use_local_env
 
+
+def use_local_env():
+    return all(bool(os.environ[key]) for key in ['RABBITMQ_USER', 'RABBITMQ_PASSWORD', 'RABBITMQ_QUEUE', 'SYSTEM_EMAIL'])
+
+
 if use_local_env():
     load_dotenv(find_dotenv())
 
