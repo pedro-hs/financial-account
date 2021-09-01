@@ -1,6 +1,7 @@
 virtualenv env &&
 source env/bin/activate &&
 pip install -r requirements.txt &&
+docker-compose down &&
 docker-compose up -d postgres &&
 docker-compose up -d rabbitmq &&
 docker-compose up -d notification &&

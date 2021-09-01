@@ -1,13 +1,13 @@
-from accounts.views import CompanyAccountViewSet, CompanyViewSet, PersonAccountViewSet
+from apps.accounts.views import CompanyAccountViewSet, CompanyViewSet, PersonAccountViewSet
+from apps.users.views import UserViewSet
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 from rest_framework.schemas import get_schema_view
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
-from transactions.views import (CreateCompanyTransactionViewSet, CreatePersonTransactionViewSet,
+from apps.transactions.views import (CreateCompanyTransactionViewSet, CreatePersonTransactionViewSet,
                                 ListCompanyTransactionsViewSet, ListPersonTransactionsViewSet)
-from users.views import UserViewSet
 
 doc_schema = get_schema_view(
     title='Financial account API',

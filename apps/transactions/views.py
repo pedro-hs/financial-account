@@ -1,6 +1,6 @@
 import json
 
-from accounts.models import CompanyAccount, PersonAccount
+from apps.accounts.models import CompanyAccount, PersonAccount
 from common.errors import BadRequest
 from django.forms import model_to_dict
 from django.shortcuts import get_object_or_404

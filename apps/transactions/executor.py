@@ -2,8 +2,8 @@ import logging
 from datetime import date, timedelta
 from uuid import uuid4
 
-from accounts.constants import ACCOUNT_TYPES
-from accounts.models import CompanyAccount, PersonAccount
+from apps.accounts.constants import ACCOUNT_TYPES
+from apps.accounts.models import CompanyAccount, PersonAccount
 from common.errors import BadRequest
 from common.rabbitmq import send_message
 from django.forms import model_to_dict

@@ -1,16 +1,16 @@
 from datetime import timedelta
 from unittest import mock
 
-from accounts.models import PersonAccount
 from common.errors import BadRequest
 from django.forms import model_to_dict
 from django.urls import reverse
 from rest_framework import routers
 from rest_framework.test import APIClient, APITestCase
-from users.models import User
 
-from transactions.models import PersonTransaction
-from transactions.serializers import PersonTransactionSerializer
+from apps.accounts.models import PersonAccount
+from apps.transactions.models import PersonTransaction
+from apps.transactions.serializers import PersonTransactionSerializer
+from apps.users.models import User
 
 from .executor import TransactionExecutor
 from .views import CreateTransaction
@@ -50,7 +50,7 @@ class TestPost(APITestCase):
 
         self.assertEqual(model_to_dict(response), model_to_dict(serializer.instance))
 
-    @mock.patch('transactions.executor.send_message')
+    @mock.patch('apps.transactions.executor.send_message')
     def test_deposit_withdrawal_sucess(self, patch):
         self.execute_and_validate(amount=40, transaction_status='done', account_status='open',
                                   balance=40, transaction_type='deposit')
@@ -59,7 +59,7 @@ class TestPost(APITestCase):
 
         patch.assert_called()
 
-    @mock.patch('transactions.executor.send_message')
+    @mock.patch('apps.transactions.executor.send_message')
     def test_deposit_withdrawal_error(self, patch):
         PersonAccount.objects.update(balance=60)
         self.execute_and_validate(amount=100, transaction_status='canceled', account_status='open',
@@ -82,7 +82,7 @@ class TestPost(APITestCase):
         except BadRequest as error:
             assert error.detail == 'Invalid amount'
 
-    @mock.patch('transactions.executor.send_message')
+    @mock.patch('apps.transactions.executor.send_message')
     def test_frozen_account(self, patch):
         PersonAccount.objects.update(status='frozen')
         self.execute_and_validate(amount=40, transaction_status='canceled', account_status='frozen',
@@ -90,7 +90,7 @@ class TestPost(APITestCase):
 
         patch.assert_called()
 
-    @mock.patch('transactions.executor.send_message')
+    @mock.patch('apps.transactions.executor.send_message')
     def test_pay_credit_error(self, patch):
         self.execute_and_validate(amount=40, transaction_status='canceled', account_status='open',
                                   balance=0, transaction_type='pay_credit', canceled_reason='no_pay')
@@ -108,14 +108,14 @@ class TestPost(APITestCase):
 
         patch.assert_called()
 
-    @mock.patch('transactions.executor.send_message')
+    @mock.patch('apps.transactions.executor.send_message')
     def test_pay_credit_success(self, patch):
         account = PersonAccount.objects.get(number='12345678')
         PersonAccount.objects.update(credit_expires=account.credit_expires - timedelta(days=30), credit_outlay=30)
         self.execute_and_validate(amount=120, transaction_status='done', account_status='open',
                                   balance=90, transaction_type='pay_credit')
 
-    @mock.patch('transactions.executor.send_message')
+    @mock.patch('apps.transactions.executor.send_message')
     def test_buy_credit_success(self, patch):
         self.execute_and_validate(amount=30, transaction_status='done', account_status='open',
                                   balance=0, transaction_type='buy_credit')

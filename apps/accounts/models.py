@@ -3,7 +3,8 @@ from random import randint
 
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
-from users.models import User
+
+from apps.users.models import User
 
 from .constants import ACCOUNT_STATUS_CHOICES
 

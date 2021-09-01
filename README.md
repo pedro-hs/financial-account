@@ -1,3 +1,12 @@
+## Depends
+
+```
+- python3
+- pip
+- docker
+- docker-compose
+```
+
 ### Português
 
 - Permitir acesso a app menos seguro no gmail

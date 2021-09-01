@@ -33,9 +33,9 @@ third_party_apps = [
 ]
 
 local_apps = [
-    'users',
-    'accounts',
-    'transactions',
+    'apps.users',
+    'apps.accounts',
+    'apps.transactions',
 ]
 
 INSTALLED_APPS = [*django_apps, *third_party_apps, *local_apps]
@@ -135,7 +135,7 @@ AUTH_USER_MODEL = 'users.User'
 JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
     'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=12),
-    'JWT_PAYLOAD_HANDLER': 'users.jwt_handler.custom_jwt',
+    'JWT_PAYLOAD_HANDLER': 'apps.users.jwt_handler.custom_jwt',
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=1)
 }
 
