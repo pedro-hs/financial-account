@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 
 from .models import Company, CompanyAccount, PersonAccount
@@ -31,10 +30,4 @@ class DefaultCompanyAccountSerializer(serializers.ModelSerializer):
 class PostCompanyAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyAccount
-        fields = '__all__'
-
-
-class CompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Company
         fields = '__all__'

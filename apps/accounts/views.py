@@ -1,41 +1,14 @@
 from common.errors import BadRequest
-from common.permissions import IsBackOffice, IsUserBase
+from common.permissions import IsBackOffice, IsUser, IsUserCompany
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, mixins, viewsets
+from rest_framework import generics, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
 from .constants import ACCOUNT_STATUS
 from .models import Company, CompanyAccount, PersonAccount
-from .serializers import (CompanySerializer, DefaultCompanyAccountSerializer,
-                          DefaultPersonAccountSerializer, PostCompanyAccountSerializer,
-                          PostPersonAccountSerializer)
-
-
-class IsUser(IsUserBase):
-    def has_object_permission(self, request, view, instance):
-        if request.user.role == 'collaborator':
-            return True
-
-        return request.user.role == 'customer' and instance.user == request.user
-
-
-class IsBackOfficeCompany(BasePermission):
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and request.user.role == 'collaborator')
-
-
-class IsUserCompany(IsAuthenticated):
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and
-                    request.user.role in ('customer', 'collaborator'))
-
-    def has_object_permission(self, request, view, instance):
-        if request.user.role == 'collaborator':
-            return True
-
-        return request.user.role == 'customer' and instance.company.user == request.user
+from .serializers import (DefaultCompanyAccountSerializer, DefaultPersonAccountSerializer,
+                          PostCompanyAccountSerializer, PostPersonAccountSerializer)
 
 
 class BaseAccountViewSet(generics.CreateAPIView,
@@ -100,7 +73,7 @@ class CompanyAccountViewSet(BaseAccountViewSet):
         self.permission_classes = [IsUserCompany]
 
         if self.request.method in ['POST', 'PUT']:
-            self.permission_classes = [IsBackOfficeCompany]
+            self.permission_classes = [IsBackOffice]
 
         return super().get_permissions()
 
@@ -109,24 +82,3 @@ class CompanyAccountViewSet(BaseAccountViewSet):
             return PostCompanyAccountSerializer
 
         return DefaultCompanyAccountSerializer
-
-
-class CompanyViewSet(generics.CreateAPIView,
-                     generics.RetrieveAPIView,
-                     generics.DestroyAPIView,
-                     viewsets.ViewSet):
-    queryset = Company.objects.all()
-    http_method_names = ['post', 'get', 'delete', 'head']
-    serializer_class = CompanySerializer
-
-    class Meta:
-        model = PersonAccount
-
-    def get_permissions(self):
-        self.permission_classes = [IsUser]
-
-        if (self.request.method in ['POST', 'DELETE'] or
-                (self.request.method == 'GET' and not bool(self.kwargs))):
-            self.permission_classes = [IsBackOffice]
-
-        return super().get_permissions()

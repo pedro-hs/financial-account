@@ -1,36 +1,21 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from random import randint
 
-from django.core.validators import MinLengthValidator, RegexValidator
+from common.validators import IS_NUMERIC
+from django.core.validators import MinLengthValidator
 from django.db import models
 
+from apps.company.models import Company
 from apps.users.models import User
 
 from .constants import ACCOUNT_STATUS_CHOICES
 
-IS_NUMERIC = RegexValidator(r'^[0-9+]', 'Only numeric characters.')
-
-
-class Company(models.Model):
-    cnpj = models.CharField(primary_key=True, max_length=14, unique=True,
-                            validators=[IS_NUMERIC, MinLengthValidator(14)])
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    trademark = models.CharField(max_length=256)
-
-    class Meta:
-        db_table = 'company'
-        verbose_name = 'Company'
-        verbose_name_plural = 'Companies'
-
-    def __str__(self):
-        return self.cnpj
-
 
 class BaseAccount(models.Model):
     number = models.CharField(primary_key=True, unique=True, max_length=11, default=str(randint(1111, 99999999999)),
-                              validators=[MinLengthValidator(4)])
-    digit = models.CharField(max_length=1, validators=[MinLengthValidator(1)])
-    agency = models.CharField(max_length=4, validators=[MinLengthValidator(2)])
+                              validators=[IS_NUMERIC, MinLengthValidator(4)])
+    digit = models.CharField(max_length=1, validators=[IS_NUMERIC, MinLengthValidator(1)])
+    agency = models.CharField(max_length=4, validators=[IS_NUMERIC, MinLengthValidator(2)])
     status = models.CharField(default='open', choices=ACCOUNT_STATUS_CHOICES, max_length=20)
     credit_limit = models.DecimalField(default=0, max_digits=12, decimal_places=2)
     credit_outlay = models.DecimalField(default=0, max_digits=12, decimal_places=2)
