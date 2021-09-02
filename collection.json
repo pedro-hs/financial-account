@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bd862626-5c1c-4d50-8ccb-cbc77dea05d9",
+		"_postman_id": "3e01235a-ac73-4dac-8d79-1f6cf128c19e",
 		"name": "account",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -550,7 +550,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"transaction_type\": \"pay_credit\",\n  \"amount\": 40,\n    \"owner_id\": \"22656054322\",\n    \"number\": \"12345\",\n    \"digit\": \"1\",\n    \"agency\": \"123\"\n}",
+							"raw": "{\n  \"transaction_type\": \"buy_credit\",\n  \"amount\": 40,\n    \"owner_id\": \"22656054322\",\n    \"number\": \"12345\",\n    \"digit\": \"1\",\n    \"agency\": \"123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -558,7 +558,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8000/transactions/accounts/person/",
+							"raw": "http://localhost:8000/transactions/person/",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -566,7 +566,6 @@
 							"port": "8000",
 							"path": [
 								"transactions",
-								"accounts",
 								"person",
 								""
 							]
@@ -595,7 +594,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8000/transactions/accounts/company/",
+							"raw": "http://localhost:8000/transactions/company/",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -603,7 +602,6 @@
 							"port": "8000",
 							"path": [
 								"transactions",
-								"accounts",
 								"company",
 								""
 							]
