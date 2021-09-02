@@ -1,9 +1,7 @@
-from apps.accounts.views import CompanyAccountViewSet, PersonAccountViewSet
-from apps.company.views import CompanyViewSet
-from apps.transactions.views import (CreateCompanyTransactionViewSet,
-                                     CreatePersonTransactionViewSet, ListCompanyTransactionsViewSet,
-                                     ListPersonTransactionsViewSet)
-from apps.users.views import UserViewSet
+from apps.accounts.urls import router as accounts_router
+from apps.company.urls import router as company_router
+from apps.transactions.urls import router as transactions_router
+from apps.users.urls import router as users_router
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
@@ -17,14 +15,8 @@ doc_schema = get_schema_view(
 )
 
 router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'accounts/person', PersonAccountViewSet)
-router.register(r'accounts/company', CompanyAccountViewSet)
-router.register(r'company', CompanyViewSet)
-router.register(r'transactions/accounts/company', CreateCompanyTransactionViewSet)
-router.register(r'transactions/accounts/person', CreatePersonTransactionViewSet)
-router.register(r'transactions/accounts/company/list', ListCompanyTransactionsViewSet)
-router.register(r'transactions/accounts/person/list', ListPersonTransactionsViewSet)
+for route in [accounts_router, company_router, transactions_router, users_router]:
+    router.registry.extend(route.registry)
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

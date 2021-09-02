@@ -8,3 +8,4 @@ htmlcov/
 .coverage
 core/static/*
 clean.sh
+TODO
