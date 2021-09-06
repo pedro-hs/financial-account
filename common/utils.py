@@ -2,7 +2,7 @@ import os
 
 
 def generate_choices(data):
-    return[(item, item) for item in data]
+    return [(item, item) for item in data]
 
 
 def use_local_env():

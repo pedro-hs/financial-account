@@ -1,6 +1,6 @@
 from common.utils import generate_choices
 
-TRANSACTION_TYPES = ['deposit', 'withdrawal', 'buy_credit', 'pay_credit']
+TRANSACTION_TYPES = ['deposit', 'withdrawal', 'use_credit', 'pay_credit']
 TRANSACTION_STATUS = ['done', 'canceled']
 CANCELED_REASONS = ['insufficient_fund', 'limit', 'frozen', 'debtor', 'no_pay']
 

@@ -1,13 +1,14 @@
 import json
 
-from apps.accounts.models import CompanyAccount, PersonAccount
 from common.errors import BadRequest
 from django.forms import model_to_dict
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, viewsets
 from rest_framework.response import Response
 
-from .executor import TransactionExecutor
+from apps.accounts.models import CompanyAccount, PersonAccount
+
+from .executor.main import TransactionExecutor
 from .models import CompanyTransaction, PersonTransaction
 from .serializers import (CompanyTransactionSerializer, ListCompanyTransactionSerializer,
                           ListPersonTransactionSerializer, PersonTransactionSerializer)

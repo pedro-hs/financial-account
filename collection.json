@@ -550,7 +550,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"transaction_type\": \"buy_credit\",\n  \"amount\": 40,\n    \"owner_id\": \"22656054322\",\n    \"number\": \"12345\",\n    \"digit\": \"1\",\n    \"agency\": \"123\"\n}",
+							"raw": "{\n  \"transaction_type\": \"use_credit\",\n  \"amount\": 40,\n    \"owner_id\": \"22656054322\",\n    \"number\": \"12345\",\n    \"digit\": \"1\",\n    \"agency\": \"123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

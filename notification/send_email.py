@@ -41,7 +41,7 @@ def format_transaction(data):
     else:
         description_message = {'deposit': 'Recebeu um deposito',
                                'withdrawal': 'Fez um saque',
-                               'buy_credit': 'Gastou crédito',
+                               'use_credit': 'Gastou crédito',
                                'pay_credit': 'Quitou o crédito'}
         message += description_message[transaction_type]
 
