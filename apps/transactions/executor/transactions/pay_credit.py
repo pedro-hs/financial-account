@@ -15,20 +15,14 @@ class PayCreditTransaction(Transaction):
     def process(self):
         if not self.credit_outlay and not self.credit_fees:
             logging.info('PayCredit transaction canceled. Nothing to pay')
-            return self.create({'status': 'canceled',
-                                'canceled_reason': 'no_pay',
-                                'note': 'Nothing to pay',
-                                'transaction_type': self.transaction_type,
-                                'amount': self.amount})
+            return self.create('canceled', self.amount,
+                               canceled_reason='no_pay', note='Nothing to pay')
 
         if self.credit_fees:
             if self.amount < self.credit_fees:
                 logging.info("PayCredit transaction canceled. Fees are pending and the amount can't pay the fees")
-                return self.create({'status': 'canceled',
-                                    'canceled_reason': 'insufficient_fund',
-                                    'note': "Fees are pending and the amount can't pay the fees",
-                                    'transaction_type': self.transaction_type,
-                                    'amount': self.amount})
+                return self.create('canceled', self.amount, canceled_reason='no_pay',
+                                   note="Fees are pending and the amount can't pay the fees")
             self.pay_credit_fees(self.amount)
 
         else:
@@ -38,9 +32,7 @@ class PayCreditTransaction(Transaction):
             self.account_instance.credit_expires = self.credit_expires + timedelta(days=30)
 
         logging.info('PayCredit transaction done')
-        return self.create({'status': 'done',
-                            'transaction_type': self.transaction_type,
-                            'amount': self.amount})
+        return self.create('done', self.amount)
 
     def pay_credit_outlay(self, amount):
         if amount >= self.credit_outlay:

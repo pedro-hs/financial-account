@@ -8,6 +8,4 @@ class DepositTransaction(Transaction):
         self.account_instance.balance = self.account_instance.balance + self.amount
 
         logging.info('Deposit transaction done')
-        return self.create({'status': 'done',
-                            'transaction_type': self.transaction_type,
-                            'amount': self.amount})
+        return self.create('done', self.amount)
