@@ -20,7 +20,7 @@ router = routers.DefaultRouter()
 client = APIClient()
 
 
-class TestPost(APITestCase):
+class TestTransactionExecutor(APITestCase):
     def setUp(self):
         User.objects.create(cpf='23756054611', email='test@mail.com',
                             password='!bF6tVmbXt9dMc#', full_name='Pedro Henrique Santos',
@@ -51,19 +51,31 @@ class TestPost(APITestCase):
         self.assertEqual(model_to_dict(response), model_to_dict(serializer.instance))
 
     @mock.patch('apps.transactions.executor.transaction.send_message')
-    def test_deposit_withdrawal_sucess(self, patch):
-        self.execute_and_validate(amount=40, transaction_status='done', account_status='open',
-                                  balance=40, transaction_type='deposit')
+    def test_withdrawal_sucess(self, patch):
+        PersonAccount.objects.update(balance=40)
         self.execute_and_validate(amount=20, transaction_status='done', account_status='open',
                                   balance=20, transaction_type='withdrawal')
 
         patch.assert_called()
 
     @mock.patch('apps.transactions.executor.transaction.send_message')
-    def test_deposit_withdrawal_error(self, patch):
+    def test_withdrawal_error(self, patch):
         PersonAccount.objects.update(balance=60)
         self.execute_and_validate(amount=100, transaction_status='canceled', account_status='open',
                                   balance=60, transaction_type='withdrawal', canceled_reason='insufficient_fund')
+
+        patch.assert_called()
+
+    @mock.patch('apps.transactions.executor.transaction.send_message')
+    def test_deposit_sucess(self, patch):
+        self.execute_and_validate(amount=40, transaction_status='done', account_status='open',
+                                  balance=40, transaction_type='deposit')
+
+        patch.assert_called()
+
+    @mock.patch('apps.transactions.executor.transaction.send_message')
+    def test_deposit_error(self, patch):
+        PersonAccount.objects.update(balance=60)
         self.execute_and_validate(amount=60, transaction_status='canceled', account_status='open',
                                   balance=60, transaction_type='withdrawal', canceled_reason='limit')
 
@@ -115,7 +127,11 @@ class TestPost(APITestCase):
         self.execute_and_validate(amount=120, transaction_status='done', account_status='open',
                                   balance=90, transaction_type='pay_credit')
 
+        patch.assert_called()
+
     @mock.patch('apps.transactions.executor.transaction.send_message')
     def test_use_credit_success(self, patch):
         self.execute_and_validate(amount=30, transaction_status='done', account_status='open',
                                   balance=0, transaction_type='use_credit')
+
+        patch.assert_called()
