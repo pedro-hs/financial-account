@@ -2,12 +2,41 @@ import logging
 from datetime import date
 from uuid import uuid4
 
-from apps.accounts.models import CompanyAccount, PersonAccount
 from common.rabbitmq import send_message
 from django.forms import model_to_dict
 
 from .entities.company import CompanyEntity
 from .entities.person import PersonEntity
+
+EMAIL_DESCRIPTION_MESSAGE = {'deposit': 'Recebeu um deposito',
+                             'withdrawal': 'Fez um saque',
+                             'use_credit': 'Gastou crédito',
+                             'pay_credit': 'Quitou o crédito'}
+
+
+def format_email(data):
+    account = data['account']
+    transaction = data['transaction']
+
+    transaction_type = transaction['transaction_type']
+    transaction_status = transaction['status']
+    transaction_description = transaction['note']
+
+    owner_id = account['owner_id']
+    account_number = account['number']
+    account_digit = account['digit']
+    account_agency = account['agency']
+
+    message = (f'Subject: Transação executada\n'
+               f'A conta {account_number}-{account_digit} da agência {account_agency} do cliente {owner_id}\n')
+
+    if transaction_status and transaction_status == 'canceled':
+        message += f'Teve uma transação cancelada pelo motivo: {transaction_description}'
+
+    else:
+        message += EMAIL_DESCRIPTION_MESSAGE[transaction_type]
+
+    return message
 
 
 class Transaction:
@@ -51,11 +80,11 @@ class Transaction:
         if transaction_data['status'] != 'canceled':
             self.account_instance.save()
 
-        message = {'transaction': model_to_dict(new_transaction),
-                   'account': {**model_to_dict(self.account),
-                               'owner_id': self.owner_id},
-                   'email_type': 'transaction'}
-        send_message(message_type='send_email', to=self.email, message=message)
+        transaction = model_to_dict(new_transaction)
+        account = {**model_to_dict(self.account),
+                   'owner_id': self.owner_id}
+        email_message = format_email(transaction, account)
+        send_message(message_type='send_email', to=self.email, message=email_message)
 
         return new_transaction
 
