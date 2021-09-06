@@ -14,10 +14,7 @@ EMAIL_DESCRIPTION_MESSAGE = {'deposit': 'Recebeu um deposito',
                              'pay_credit': 'Quitou o crédito'}
 
 
-def format_email(data):
-    account = data['account']
-    transaction = data['transaction']
-
+def format_email(transaction, account):
     transaction_type = transaction['transaction_type']
     transaction_status = transaction['status']
     transaction_description = transaction['note']
