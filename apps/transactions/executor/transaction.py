@@ -10,8 +10,8 @@ from .entities.person import PersonEntity
 
 EMAIL_DESCRIPTION_MESSAGE = {'deposit': 'Recebeu um deposito',
                              'withdrawal': 'Fez um saque',
-                             'use_credit': 'Gastou crédito',
-                             'pay_credit': 'Quitou o crédito'}
+                             'use_credit': 'Gastou o crédito',
+                             'pay_credit': 'Pagou o crédito'}
 
 
 def format_email(transaction, account):
