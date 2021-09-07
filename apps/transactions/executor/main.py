@@ -47,4 +47,5 @@ class TransactionExecutor:
         return ACCOUNT_TYPES[transaction_type_index]
 
     def execute_transaction(self):
-        return TRANSACTIONS[self.transaction_type](self.account, self.amount, self.transaction_type, self.account_type).execute()
+        return TRANSACTIONS[self.transaction_type](self.account, self.amount,
+                                                   self.transaction_type, self.account_type).execute()

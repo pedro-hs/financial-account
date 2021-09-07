@@ -58,14 +58,15 @@ class Transaction:
 
     def execute(self):
         if self.account_instance.status == 'frozen':
-            logging.info("%s transaction canceled. Account is frozen and can't execute transactions",
-                         self.transaction_type)
             return self.create('canceled', self.amount, canceled_reason='frozen',
                                note="Account is frozen and can't execute transactions")
 
         return self.process()
 
     def create(self, status, amount, canceled_reason=None, note=None):
+        message = f'{self.transaction_type} transaction {status}' + (f'. {note}' if note else '')
+        logging.info(message)
+
         transaction_data = {'transaction_type': self.transaction_type,
                             'id': str(uuid4()),
                             'account': self.account,
