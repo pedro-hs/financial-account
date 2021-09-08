@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, timedelta
 
 from apps.transactions.executor.transaction import Transaction
 
@@ -44,6 +44,7 @@ class PayCreditTransaction(Transaction):
     def pay_credit_fees(self, amount):
         if amount >= self.credit_fees:
             remaining = amount - self.credit_fees
+            self.account_instance.credit_expires = date.now()
 
             if remaining:
                 self.pay_credit_outlay(remaining)
