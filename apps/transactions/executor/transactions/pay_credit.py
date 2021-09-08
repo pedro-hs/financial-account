@@ -26,7 +26,7 @@ class PayCreditTransaction(Transaction):
             self.pay_credit_outlay(self.amount)
 
         if not self.account_instance.credit_outlay:
-            self.account_instance.credit_expires = self.credit_expires + timedelta(days=30)
+            self.account_instance.credit_expires = date.now() + timedelta(days=30)
 
         return self.create('done', self.amount)
 
