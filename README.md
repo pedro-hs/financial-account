@@ -5,6 +5,7 @@
 - pip
 - docker
 - docker-compose
+- virtualenv
 ```
 
 ### Português
