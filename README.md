@@ -1,3 +1,11 @@
+## 💰 Financial Account
+
+[![Python](https://img.shields.io/badge/language-Python-green.svg)](https://github.com/pedro-hs/checkbox.sh/blob/master/checkbox.sh) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/pedro-hs/terminal-checkbox.sh/master/LICENSE.md)
+
+#### Django Rest Framework, PostgreSQL, RabbitMQ, Docker, Swagger
+
+<br></br>
+
 ## Depends
 
 ```
@@ -8,7 +16,10 @@
 - virtualenv
 ```
 
+<br></br>
+
 ### Português
+#### API com autenticação para criação de contas bancárias e processamento de transações monetárias
 
 - Permitir acesso a app menos seguro no gmail
 
@@ -42,7 +53,10 @@
 
 ---
 
+<br></br>
+
 ### English
+#### API with authentication for creating bank accounts and processing monetary transactions
 
 - Allow access to less secure app in gmail
 
