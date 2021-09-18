@@ -1,0 +1,10 @@
+add created_by e created_at, update_by, updated_at (model)
+    on_destroy (viewset)
+    on_update (viewset) para setar updated_by, etc
+add validacao somente o usuario pode chamar os servicos de transacao
+restful urls
+criar campos que podem ser inseridos, mas nao podem ser atualizados
+adicionar filtro de data e tipo de transacao na listagem de transacoes
+escrever testes para company e account
+add password reset
+add integracao com front
