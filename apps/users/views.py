@@ -55,6 +55,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         get_serializer = {'update': PutUserSerializer,
                           'create': PostUserSerializer}
+
         return get_serializer.get(self.action, DefaultUserSerializer)
 
     def perform_destroy(self, instance):

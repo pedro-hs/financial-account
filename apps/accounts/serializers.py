@@ -1,10 +1,7 @@
 from rest_framework import serializers
 
+from .constants import ACCOUNT_FIELDS, ACCOUNT_READONLY_FIELDS
 from .models import Company, CompanyAccount, PersonAccount
-
-ACCOUNT_FIELDS = ('number', 'digit', 'agency', 'status', 'credit_limit',
-                  'credit_outlay', 'credit_expires', 'withdrawal_limit', 'balance')
-ACCOUNT_READONLY_FIELDS = ('number', 'digit', 'agency', 'balance', 'credit_expires', 'credit_outlay')
 
 
 class DefaultPersonAccountSerializer(serializers.ModelSerializer):

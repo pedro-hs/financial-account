@@ -41,13 +41,14 @@
   `python3 manage.py createsuperuser`
 
 - Run API
-- (docker)
+
+  - (docker)
 
   ```
   source run.sh
   ```
 
-- (local)
+  - (local)
 
   ```
   source run.sh local
@@ -85,13 +86,14 @@
   `python3 manage.py createsuperuser`
 
 - Subir API
-- (docker)
+
+  - (docker)
 
   ```
   source run.sh
   ```
 
-- (local)
+  - (local)
 
   ```
   source run.sh local
