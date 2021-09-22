@@ -13,13 +13,13 @@ class PayCreditTransaction(Transaction):
 
     def process(self):
         if not self.credit_outlay and not self.credit_fees:
-            return self.create('canceled', self.amount,
-                               canceled_reason='no_pay', note='Nothing to pay')
+            return self.create('canceled', self.amount, 'no_pay', 'Nothing to pay')
 
         if self.credit_fees:
             if self.amount < self.credit_fees:
-                return self.create('canceled', self.amount, canceled_reason='no_pay',
-                                   note="Fees are pending and the amount can't pay the fees")
+                return self.create('canceled', self.amount, 'no_pay',
+                                   "Fees are pending and the amount can't pay the fees")
+
             self.pay_credit_fees(self.amount)
 
         else:

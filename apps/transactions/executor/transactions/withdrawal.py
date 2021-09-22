@@ -6,12 +6,10 @@ class WithDrawalTransaction(Transaction):
         balance = self.account_instance.balance
 
         if self.amount > balance:
-            return self.create('canceled', self.amount, canceled_reason='insufficient_fund',
-                               note='Fund is lower than balance')
+            return self.create('canceled', self.amount, 'insufficient_fund', 'Fund is lower than balance')
 
         if self.amount > self.account_instance.withdrawal_limit:
-            return self.create('canceled', self.amount, canceled_reason='limit',
-                               note='Limit of withdrawal achieved')
+            return self.create('canceled', self.amount, 'limit', 'Limit of withdrawal achieved')
 
         self.account_instance.balance = balance - self.amount
 

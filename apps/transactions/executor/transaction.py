@@ -58,8 +58,7 @@ class Transaction:
 
     def execute(self):
         if self.account_instance.status == 'frozen':
-            return self.create('canceled', self.amount, canceled_reason='frozen',
-                               note="Account is frozen and can't execute transactions")
+            return self.create('canceled', self.amount, 'frozen', "Account is frozen and can't execute transactions")
 
         return self.process()
 

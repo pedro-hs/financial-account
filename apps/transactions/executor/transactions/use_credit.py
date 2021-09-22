@@ -8,12 +8,11 @@ class UseCreditTransaction(Transaction):
         self.credit_fees = self.calculate_credit_fees(self.credit_expires)
 
         if self.credit_fees:
-            return self.create('canceled', self.amount, canceled_reason='debitor',
-                               note='Is need to pay the credit outlay and fees in order to use credit again')
+            return self.create('canceled', self.amount, 'debitor',
+                               'Is need to pay the credit outlay and fees in order to use credit again')
 
         if (credit_outlay + self.amount) > self.account_instance.credit_limit:
-            return self.create('canceled', self.amount, canceled_reason='limit',
-                               note='Limit of credit achieved')
+            return self.create('canceled', self.amount, 'limit', 'Limit of credit achieved')
 
         self.account_instance.credit_outlay = + self.amount
 
