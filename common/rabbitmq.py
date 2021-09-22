@@ -5,12 +5,11 @@ import pika
 from django.core.serializers.json import DjangoJSONEncoder
 from dotenv import find_dotenv, load_dotenv
 
-from common.utils import use_local_env
+from common.utils import load_env
 
 
 def send_message(**kwargs):
-    if use_local_env():
-        load_dotenv(find_dotenv())
+    load_env()
 
     credentials = pika.PlainCredentials(os.environ['RABBITMQ_USER'], os.environ['RABBITMQ_PASSWORD'])
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=os.environ['RABBITMQ_HOST'], port=os.environ['RABBITMQ_PORT'],

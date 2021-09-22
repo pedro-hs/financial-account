@@ -13,7 +13,6 @@ from apps.transactions.serializers import PersonTransactionSerializer
 from apps.users.models import User
 
 from .executor.main import TransactionExecutor
-from .views import CreateTransaction
 
 router = routers.DefaultRouter()
 

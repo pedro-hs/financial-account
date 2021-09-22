@@ -3,13 +3,11 @@ import logging
 import os
 from pathlib import Path
 
-from common.utils import use_local_env
-from dotenv import find_dotenv, load_dotenv
+from common.utils import load_env
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-if use_local_env():
-    load_dotenv(find_dotenv())
+load_env()
 
 SECRET_KEY = os.environ['SECRET_KEY']
 

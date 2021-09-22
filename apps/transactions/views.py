@@ -14,25 +14,7 @@ from .serializers import (CompanyTransactionSerializer, ListCompanyTransactionSe
                           ListPersonTransactionSerializer, PersonTransactionSerializer)
 
 
-class ListCompanyTransactionsViewSet(generics.ListAPIView, viewsets.ViewSet):
-    queryset = CompanyTransaction.objects.all()
-    http_method_names = ['get', 'head']
-    serializer_class = CompanyTransactionSerializer
-
-    class Meta:
-        model = ListCompanyTransactionSerializer
-
-
-class ListPersonTransactionsViewSet(generics.ListAPIView, viewsets.ViewSet):
-    queryset = PersonTransaction.objects.all()
-    http_method_names = ['get', 'head']
-    serializer_class = ListPersonTransactionSerializer
-
-    class Meta:
-        model = PersonTransaction
-
-
-class CreateTransaction(generics.CreateAPIView, viewsets.ViewSet):
+class BaseTransactionViewSet(generics.CreateAPIView, generics.ListAPIView, viewsets.ViewSet):
     class Meta:
         abstract = True
 
@@ -64,9 +46,9 @@ class CreateTransaction(generics.CreateAPIView, viewsets.ViewSet):
         return account
 
 
-class CreateCompanyTransactionViewSet(CreateTransaction):
+class CreateCompanyTransactionViewSet(BaseTransactionViewSet):
     queryset = CompanyTransaction.objects.all()
-    http_method_names = ['post', 'head']
+    http_method_names = ['get', 'post', 'head']
     serializer_class = CompanyTransactionSerializer
 
     class Meta:
@@ -78,10 +60,15 @@ class CreateCompanyTransactionViewSet(CreateTransaction):
     def query_account(self, number):
         return get_object_or_404(CompanyAccount, pk=number)
 
+    def get_serializer_class(self):
+        get_serializer = {'list': ListCompanyTransactionSerializer,
+                          'create': CompanyTransactionSerializer}
+        return get_serializer.get(self.action, CompanyTransactionSerializer)
 
-class CreatePersonTransactionViewSet(CreateTransaction):
+
+class CreatePersonTransactionViewSet(BaseTransactionViewSet):
     queryset = PersonTransaction.objects.all()
-    http_method_names = ['post', 'head']
+    http_method_names = ['get', 'post', 'head']
     serializer_class = PersonTransactionSerializer
 
     class Meta:
@@ -92,3 +79,8 @@ class CreatePersonTransactionViewSet(CreateTransaction):
 
     def query_account(self, number):
         return get_object_or_404(PersonAccount, pk=number)
+
+    def get_serializer_class(self):
+        get_serializer = {'list': ListPersonTransactionSerializer,
+                          'create': PersonTransactionSerializer}
+        return get_serializer.get(self.action, PersonTransactionSerializer)

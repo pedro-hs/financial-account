@@ -1,4 +1,4 @@
-from common.validators import IS_NUMERIC
+from common.utils import IS_NUMERIC
 from django.core.validators import MinLengthValidator
 from django.db import models
 
