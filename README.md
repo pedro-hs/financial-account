@@ -24,8 +24,6 @@
 
 - Allow access to less secure app in gmail
 
-- `(In a debian like environment)`
-
 - Clone the project
   `git clone https://github.com/pedro-hs/financial-account.git`
 
@@ -68,8 +66,6 @@
 #### API com autenticação para criação de contas bancárias e processamento de transações monetárias
 
 - Permitir acesso a app menos seguro no gmail
-
-- `(Em um ambiente debian like)`
 
 - Clonar o projeto
   `git clone https://github.com/pedro-hs/financial-account.git`
