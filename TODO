@@ -9,6 +9,7 @@ escrever testes para company e account
 add password reset
 add integracao com front
 tornar notificacao e variavel de ambiente de email opcional
+internalizar docker-compose do notification
 
 
 Add features no readme
