@@ -10,6 +10,7 @@ add password reset
 add integracao com front
 tornar notificacao e variavel de ambiente de email opcional
 internalizar docker-compose do notification
+clean arch
 
 
 Add features no readme
